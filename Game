@@ -1,0 +1,1248 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no" />
+<meta name="description" content="Ajude a tartaruga marinha a evitar o lixo no oceano neste jogo educativo e divertido!">
+<meta name="keywords" content="tartaruga, jogo, ecologia, oceano, poluição, preservação">
+<title>🐢 Salve a Tartaruga! (Retro Edition) - Jogo Educativo</title>
+<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🐢</text></svg>">
+<style>
+  * {
+    touch-action: manipulation;
+    box-sizing: border-box;
+    image-rendering: pixelated;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+  }
+  
+  body {
+    font-family: 'Press Start 2P', cursive;
+    text-align: center;
+    background: #006994;
+    margin: 0; padding: 0;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    -webkit-tap-highlight-color: transparent;
+    color: #fff;
+    overflow-x: hidden;
+  }
+  
+  h1 {
+    margin: 10px 0;
+    color: #ffcc00;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    font-size: clamp(1.5em, 6vw, 2.2em);
+    letter-spacing: -1px;
+  }
+  
+  #game-container {
+    position: relative;
+    width: 100%;
+    max-width: 400px;
+    touch-action: none;
+    margin: 10px 0;
+  }
+  
+  #game {
+    position: relative;
+    margin: 0 auto;
+    width: 100%;
+    max-width: 320px;
+    height: 420px;
+    background: #1a6fc9;
+    background-image: 
+      linear-gradient(#1a6fc9 1px, transparent 1px),
+      linear-gradient(90deg, #1a6fc9 1px, transparent 1px);
+    background-size: 20px 20px;
+    border: 4px solid #000;
+    border-radius: 0;
+    overflow: hidden;
+    box-shadow: 0 0 0 4px #ffcc00;
+    touch-action: none;
+  }
+  
+  #score-display {
+    margin: 10px 0;
+    font-size: clamp(0.8em, 4vw, 1em);
+    color: #ffcc00;
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    max-width: 320px;
+    padding: 0 5px;
+    text-shadow: 2px 2px 0 #000;
+  }
+  
+  #controls {
+    margin: 15px 0;
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    width: 100%;
+    max-width: 320px;
+  }
+  
+  button {
+    padding: 10px 15px;
+    background: #ff6600;
+    color: #fff;
+    border: none;
+    border-bottom: 4px solid #cc5200;
+    border-right: 4px solid #cc5200;
+    border-radius: 0;
+    font-family: 'Press Start 2P', cursive;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.3);
+    transition: all 0.1s;
+    font-size: 0.7em;
+    flex: 1;
+    min-width: 120px;
+    touch-action: manipulation;
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 1px;
+  }
+  
+  button:active, button:focus {
+    background: #cc5200;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.3);
+    border-bottom: 2px solid #cc5200;
+    border-right: 2px solid #cc5200;
+    outline: none;
+  }
+  
+  #message {
+    margin: 15px 0;
+    font-size: clamp(1em, 5vw, 1.2em);
+    color: #ffcc00;
+    min-height: 1.5em;
+    text-shadow: 2px 2px 0 #000;
+    padding: 0 10px;
+  }
+  
+  /* Tartaruga em estilo retro */
+  #turtle {
+    position: absolute;
+    bottom: 10px;
+    width: 32px;
+    height: 32px;
+    transition: left 0.08s ease-out;
+    z-index: 10;
+    will-change: left;
+  }
+  
+  /* Área de colisão menor (apenas o casco) */
+  #turtle .hitbox {
+    position: absolute;
+    top: 0;
+    left: 4px;
+    width: 24px;
+    height: 20px;
+    /* border: 1px solid red; /* Descomente para visualizar a hitbox */
+  }
+  
+  #turtle .shell {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 32px;
+    height: 24px;
+    background: #00aa00;
+    border-radius: 0;
+    border: 2px solid #000;
+    box-shadow:
+      inset -4px -4px 0 #008800,
+      inset 4px 4px 0 #00cc00;
+  }
+  
+  #turtle .head {
+    position: absolute;
+    top: 16px;
+    left: -4px;
+    width: 12px;
+    height: 12px;
+    background: #00aa00;
+    border: 2px solid #000;
+    border-radius: 0;
+  }
+  
+  #turtle .eye {
+    position: absolute;
+    top: 4px;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border: 1px solid #000;
+  }
+  
+  #turtle .eye.left {
+    left: 2px;
+  }
+  
+  #turtle .eye.right {
+    left: 6px;
+  }
+  
+  #turtle .leg {
+    position: absolute;
+    width: 8px;
+    height: 8px;
+    background: #00aa00;
+    border: 2px solid #000;
+  }
+  
+  #turtle .leg.front-left {
+    top: 12px;
+    left: 4px;
+  }
+  
+  #turtle .leg.front-right {
+    top: 12px;
+    left: 20px;
+  }
+  
+  #turtle .leg.back-left {
+    top: 20px;
+    left: 4px;
+  }
+  
+  #turtle .leg.back-right {
+    top: 20px;
+    left: 20px;
+  }
+  
+  @keyframes dance {
+    0%, 100% { transform: translateY(0) rotate(0); }
+    25% { transform: translateY(-4px) rotate(5deg); }
+    50% { transform: translateY(0) rotate(0); }
+    75% { transform: translateY(-4px) rotate(-5deg); }
+  }
+  
+  .dancing {
+    animation: dance 0.5s infinite;
+  }
+
+  /* Objetos caindo */
+  .falling-object {
+    position: absolute;
+    z-index: 5;
+    will-change: transform, top;
+  }
+  
+  /* Garrafa PET detalhada */
+  .bottle {
+    width: 16px;
+    height: 32px;
+    background: #00aaff;
+    border: 2px solid #000;
+    position: relative;
+  }
+  
+  .bottle::before {
+    content: '';
+    position: absolute;
+    top: -4px;
+    left: 2px;
+    width: 12px;
+    height: 6px;
+    background: #00aaff;
+    border: 2px solid #000;
+    border-bottom: none;
+  }
+  
+  .bottle::after {
+    content: '';
+    position: absolute;
+    bottom: 4px;
+    left: 4px;
+    width: 8px;
+    height: 4px;
+    background: rgba(255,255,255,0.5);
+    border: 1px solid #000;
+  }
+  
+  /* Sacola plástica */
+  .plastic-bag {
+    width: 20px;
+    height: 24px;
+    background: rgba(255,255,255,0.9);
+    border: 2px solid #000;
+  }
+  
+  /* Rede de pesca */
+  .fishing-net {
+    width: 32px;
+    height: 32px;
+    background: 
+      linear-gradient(45deg, transparent 45%, #fff 45%, #fff 55%, transparent 55%),
+      linear-gradient(-45deg, transparent 45%, #fff 45%, #fff 55%, transparent 55%);
+    background-size: 8px 8px;
+    border: 2px solid #fff;
+  }
+  
+  /* Lata de refrigerante */
+  .can {
+    width: 16px;
+    height: 24px;
+    background: #ff0000;
+    border: 2px solid #000;
+    position: relative;
+  }
+  
+  .can::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 8px;
+    height: 4px;
+    background: rgba(255,255,255,0.7);
+    border: 1px solid #000;
+  }
+  
+  /* Pneu */
+  .tire {
+    width: 24px;
+    height: 24px;
+    background: #333;
+    border-radius: 50%;
+    border: 2px solid #000;
+    position: relative;
+  }
+  
+  .tire::after {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 4px;
+    width: 12px;
+    height: 12px;
+    background: #555;
+    border-radius: 50%;
+    border: 1px solid #000;
+  }
+  
+  /* Bolhas de ar */
+  .bubble {
+    position: absolute;
+    background: rgba(255, 255, 255, 0.8);
+    border: 1px solid #fff;
+    border-radius: 50%;
+    animation: float-up 3s infinite;
+    z-index: 1;
+    will-change: transform;
+  }
+  
+  @keyframes float-up {
+    0% {
+      transform: translateY(0);
+      opacity: 0;
+    }
+    10% {
+      opacity: 0.8;
+    }
+    90% {
+      opacity: 0.8;
+    }
+    100% {
+      transform: translateY(-100px);
+      opacity: 0;
+    }
+  }
+  
+  /* Efeito de splash */
+  .splash {
+    position: absolute;
+    width: 48px;
+    height: 24px;
+    background: rgba(255, 255, 255, 0.8);
+    border: 2px solid #fff;
+    animation: fade-out 0.5s forwards;
+    z-index: 20;
+    will-change: transform, opacity;
+  }
+  
+  @keyframes fade-out {
+    to {
+      transform: scale(1.5);
+      opacity: 0;
+    }
+  }
+  
+  /* Efeito de colisão */
+  .collision-effect {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: radial-gradient(circle, rgba(255,0,0,0.8) 0%, rgba(255,0,0,0) 70%);
+    animation: expand-fade 0.5s forwards;
+    z-index: 15;
+  }
+  
+  @keyframes expand-fade {
+    0% {
+      transform: scale(0.5);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(2);
+      opacity: 0;
+    }
+  }
+  
+  /* Modal de fim de jogo */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.8);
+    z-index: 100;
+    justify-content: center;
+    align-items: center;
+    touch-action: none;
+  }
+  
+  .modal-content {
+    background: #1a6fc9;
+    padding: 20px;
+    border: 4px solid #ffcc00;
+    max-width: 90%;
+    width: 300px;
+    text-align: center;
+    box-shadow: 0 0 0 4px #000;
+    position: relative;
+  }
+  
+  .modal h2 {
+    color: #ffcc00;
+    margin-top: 0;
+    font-size: clamp(1.5em, 6vw, 1.8em);
+    text-shadow: 2px 2px 0 #000;
+  }
+  
+  .modal p {
+    font-size: clamp(1em, 4vw, 1.2em);
+    text-shadow: 2px 2px 0 #000;
+    margin: 10px 0;
+  }
+  
+  .modal button {
+    margin-top: 15px;
+    padding: 10px 15px;
+    font-size: 0.8em;
+  }
+  
+  /* Tela de ranking */
+  #ranking-modal {
+    display: none;
+  }
+  
+  #ranking-list {
+    max-height: 200px;
+    overflow-y: auto;
+    margin: 15px 0;
+    padding: 0;
+    list-style: none;
+    border: 2px solid #ffcc00;
+    background: rgba(0, 0, 0, 0.3);
+  }
+  
+  #ranking-list li {
+    padding: 8px;
+    border-bottom: 1px solid #ffcc00;
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  #ranking-list li:nth-child(1) {
+    color: gold;
+    font-weight: bold;
+  }
+  
+  #ranking-list li:nth-child(2) {
+    color: silver;
+  }
+  
+  #ranking-list li:nth-child(3) {
+    color: #cd7f32; /* bronze */
+  }
+  
+  #player-name-input {
+    font-family: 'Press Start 2P', cursive;
+    padding: 8px;
+    width: 100%;
+    margin: 10px 0;
+    font-size: 0.7em;
+    text-align: center;
+    border: 2px solid #ffcc00;
+    background: rgba(0, 0, 0, 0.5);
+    color: white;
+  }
+  
+  /* Tela de carregamento */
+  #loading-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #006994;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    transition: opacity 0.5s ease-out;
+  }
+  
+  #loading-screen h2 {
+    color: #ffcc00;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-shadow: 2px 2px 0 #000;
+  }
+  
+  .loader {
+    width: 32px;
+    height: 32px;
+    border: 4px solid #ffcc00;
+    border-top-color: transparent;
+    animation: spin 1s linear infinite;
+    margin-bottom: 20px;
+  }
+  
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  
+  /* Tela de início do jogo */
+  #start-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: #006994;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    z-index: 999;
+    transition: opacity 0.5s ease-out;
+  }
+  
+  #start-screen h2 {
+    color: #ffcc00;
+    margin-bottom: 20px;
+    font-size: 1.5em;
+    text-shadow: 3px 3px 0 #000, -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000;
+    text-align: center;
+    line-height: 1.4;
+  }
+  
+  #start-screen p {
+    color: #fff;
+    margin-bottom: 20px;
+    max-width: 80%;
+    text-align: center;
+    line-height: 1.4;
+    font-size: 0.8em;
+    text-shadow: 2px 2px 0 #000;
+  }
+  
+  /* Botão de início */
+  #start-game-btn {
+    position: relative;
+    padding: 10px 20px;
+    font-size: 12px;
+    background: #ff6600;
+    color: #fff;
+    border: none;
+    border-bottom: 4px solid #cc5200;
+    border-right: 4px solid #cc5200;
+    text-transform: uppercase;
+    cursor: pointer;
+    box-shadow: 4px 4px 0 rgba(0,0,0,0.5);
+    text-shadow: 2px 2px 0 #000;
+    letter-spacing: 1px;
+    transition: all 0.1s;
+    margin-top: 15px;
+    outline: none;
+  }
+  
+  #start-game-btn:hover {
+    background: #ff7733;
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0 rgba(0,0,0,0.5);
+  }
+  
+  #start-game-btn:active {
+    transform: translate(4px, 4px);
+    box-shadow: none;
+    border-bottom: 2px solid #cc5200;
+    border-right: 2px solid #cc5200;
+  }
+  
+  #start-game-btn::before {
+    content: '';
+    position: absolute;
+    top: -6px;
+    left: -6px;
+    right: -6px;
+    bottom: -6px;
+    border: 2px solid #000;
+    z-index: -1;
+  }
+  
+  /* Responsividade para telas maiores */
+  @media (min-width: 768px) {
+    #game {
+      max-width: 400px;
+      height: 500px;
+    }
+    
+    #score-display {
+      max-width: 400px;
+      font-size: 1em;
+    }
+    
+    #controls {
+      max-width: 400px;
+    }
+    
+    button {
+      font-size: 0.8em;
+      min-width: 150px;
+    }
+    
+    #turtle {
+      width: 40px;
+      height: 40px;
+    }
+    
+    #turtle .shell {
+      width: 40px;
+      height: 30px;
+    }
+    
+    #turtle .hitbox {
+      left: 6px;
+      width: 28px;
+      height: 24px;
+    }
+    
+    #turtle .head {
+      width: 14px;
+      height: 14px;
+    }
+    
+    #turtle .leg {
+      width: 10px;
+      height: 10px;
+    }
+    
+    .bottle, .can, .plastic-bag, .fishing-net, .tire {
+      transform: scale(1.2);
+    }
+  }
+</style>
+</head>
+<body>
+  <!-- Tela de carregamento -->
+  <div id="loading-screen">
+    <div class="loader"></div>
+    <h2>CARREGANDO...</h2>
+  </div>
+  
+  <!-- Tela de início do jogo -->
+  <div id="start-screen">
+    <h2>🐢 SALVE A TARTARUGA! 🌊</h2>
+    <p>AJUDE A TARTARUGA MARINHA A EVITAR O LIXO NO OCEANO. USE OS BOTÕES OU DESLIZE PARA OS LADOS PARA MOVÊ-LA!</p>
+    <p>CADA LIXO EVITADO VALE PONTOS!</p>
+    <button id="start-game-btn">COMEÇAR</button>
+  </div>
+  
+  <!-- Jogo principal (inicialmente escondido) -->
+  <div id="main-game" style="display: none;">
+    <h1>🐢 SALVE A TARTARUGA! 🌊</h1>
+    
+    <div id="score-display">
+      <div>PONTOS: <span id="score">0</span></div>
+      <div>RECORDE: <span id="high-score">0</span></div>
+    </div>
+    
+    <div id="game-container">
+      <div id="game">
+        <div id="turtle">
+          <div class="hitbox"></div>
+          <div class="shell"></div>
+          <div class="head">
+            <div class="eye left"></div>
+            <div class="eye right"></div>
+          </div>
+          <div class="leg front-left"></div>
+          <div class="leg front-right"></div>
+          <div class="leg back-left"></div>
+          <div class="leg back-right"></div>
+        </div>
+      </div>
+    </div>
+    
+    <div id="controls">
+      <button id="left-btn">⬅ ESQUERDA</button>
+      <button id="right-btn">DIREITA ➡</button>
+    </div>
+    
+    <div id="message"></div>
+    
+    <!-- Modal de fim de jogo -->
+    <div id="game-over-modal" class="modal">
+      <div class="modal-content">
+        <h2>FIM DE JOGO!</h2>
+        <p>PONTUAÇÃO: <span id="final-score">0</span></p>
+        <p>RECORDE: <span id="final-high-score">0</span></p>
+        <input type="text" id="player-name-input" placeholder="DIGITE SEU NOME" maxlength="15">
+        <button id="save-score-btn">SALVAR PONTUAÇÃO</button>
+        <button id="restart-btn">JOGAR NOVAMENTE</button>
+        <button id="show-ranking-btn">VER RANKING</button>
+      </div>
+    </div>
+    
+    <!-- Modal de ranking -->
+    <div id="ranking-modal" class="modal">
+      <div class="modal-content">
+        <h2>🏆 RANKING 🏆</h2>
+        <ul id="ranking-list">
+          <!-- Itens do ranking serão inseridos aqui via JavaScript -->
+        </ul>
+        <button id="back-to-game-btn">VOLTAR AO JOGO</button>
+      </div>
+    </div>
+  </div>
+
+<script>
+  // Elementos do jogo
+  const loadingScreen = document.getElementById('loading-screen');
+  const startScreen = document.getElementById('start-screen');
+  const mainGame = document.getElementById('main-game');
+  const startGameBtn = document.getElementById('start-game-btn');
+  const game = document.getElementById('game');
+  const turtle = document.getElementById('turtle');
+  const turtleHitbox = turtle.querySelector('.hitbox');
+  const message = document.getElementById('message');
+  const scoreDisplay = document.getElementById('score');
+  const highScoreDisplay = document.getElementById('high-score');
+  const leftBtn = document.getElementById('left-btn');
+  const rightBtn = document.getElementById('right-btn');
+  const gameOverModal = document.getElementById('game-over-modal');
+  const finalScoreDisplay = document.getElementById('final-score');
+  const finalHighScoreDisplay = document.getElementById('final-high-score');
+  const restartBtn = document.getElementById('restart-btn');
+  const saveScoreBtn = document.getElementById('save-score-btn');
+  const showRankingBtn = document.getElementById('show-ranking-btn');
+  const rankingModal = document.getElementById('ranking-modal');
+  const rankingList = document.getElementById('ranking-list');
+  const backToGameBtn = document.getElementById('back-to-game-btn');
+  const playerNameInput = document.getElementById('player-name-input');
+
+  // Variáveis do jogo
+  let turtlePosition;
+  let score = 0;
+  let highScore = localStorage.getItem('highScore') || 0;
+  let gameOver = false;
+  let gameSpeed = 1000; // Taxa base de spawn
+  let lastMoveTime = 0;
+  const moveCooldown = 100;
+  let gameStarted = false;
+  let trashCount = 0;
+  let activeTrash = []; // Array para controlar os lixos ativos
+  let invincible = false; // Estado de invencibilidade após colisão
+  
+  // Configurações iniciais
+  highScoreDisplay.textContent = highScore;
+  game.style.maxWidth = '320px';
+  game.style.width = '100%';
+  
+  // Centralizar tartaruga
+  function centerTurtle() {
+    turtlePosition = Math.floor((game.offsetWidth - turtle.offsetWidth) / 2);
+    turtle.style.left = turtlePosition + 'px';
+  }
+  
+  // Obter ranking do localStorage
+  let ranking = JSON.parse(localStorage.getItem('ranking')) || [];
+  
+  // Atualizar ranking na tela
+  function updateRankingDisplay() {
+    rankingList.innerHTML = '';
+    
+    // Ordenar ranking por pontuação (maior primeiro)
+    const sortedRanking = [...ranking].sort((a, b) => b.score - a.score);
+    
+    // Mostrar apenas os top 10
+    const top10 = sortedRanking.slice(0, 10);
+    
+    if (top10.length === 0) {
+      const li = document.createElement('li');
+      li.textContent = 'NENHUM REGISTRO AINDA';
+      rankingList.appendChild(li);
+    } else {
+      top10.forEach((player, index) => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${index + 1}. ${player.name}</span> <span>${player.score}</span>`;
+        rankingList.appendChild(li);
+      });
+    }
+  }
+  
+  // Adicionar pontuação ao ranking
+  function addToRanking(name, score) {
+    // Limitar nome a 15 caracteres
+    const trimmedName = name.substring(0, 15).toUpperCase();
+    
+    // Verificar se o jogador já está no ranking
+    const existingPlayerIndex = ranking.findIndex(p => p.name === trimmedName);
+    
+    if (existingPlayerIndex !== -1) {
+      // Atualizar pontuação se for maior
+      if (score > ranking[existingPlayerIndex].score) {
+        ranking[existingPlayerIndex].score = score;
+        ranking[existingPlayerIndex].date = new Date().toISOString();
+      }
+    } else {
+      // Adicionar novo jogador
+      ranking.push({
+        name: trimmedName,
+        score: score,
+        date: new Date().toISOString()
+      });
+    }
+    
+    // Salvar no localStorage
+    localStorage.setItem('ranking', JSON.stringify(ranking));
+    updateRankingDisplay();
+  }
+  
+  // Simular carregamento
+  setTimeout(() => {
+    loadingScreen.style.opacity = '0';
+    setTimeout(() => {
+      loadingScreen.style.display = 'none';
+      startScreen.style.display = 'flex';
+    }, 500);
+  }, 2000);
+  
+  // Iniciar o jogo quando o botão for clicado
+  startGameBtn.addEventListener('click', () => {
+    startScreen.style.opacity = '0';
+    setTimeout(() => {
+      startScreen.style.display = 'none';
+      mainGame.style.display = 'block';
+      gameStarted = true;
+      centerTurtle();
+      startGame();
+    }, 500);
+  });
+  
+  // Criar bolhas de ar aleatórias
+  function createBubbles() {
+    setInterval(() => {
+      if (gameOver) return;
+      
+      const bubble = document.createElement('div');
+      bubble.classList.add('bubble');
+      bubble.style.left = Math.random() * 100 + '%';
+      bubble.style.bottom = '0px';
+      const size = Math.floor(Math.random() * 3) * 4 + 4;
+      bubble.style.width = size + 'px';
+      bubble.style.height = size + 'px';
+      game.appendChild(bubble);
+      
+      // Remover após animação
+      setTimeout(() => {
+        if (bubble.parentNode) {
+          game.removeChild(bubble);
+        }
+      }, 3000);
+    }, 500);
+  }
+  
+  // Movimentação da tartaruga
+  function moveTurtle(direction) {
+    if (gameOver) return;
+    
+    const now = Date.now();
+    if (now - lastMoveTime < moveCooldown) return;
+    lastMoveTime = now;
+    
+    // Criar efeito de splash
+    const splash = document.createElement('div');
+    splash.classList.add('splash');
+    splash.style.left = (turtlePosition - 5) + 'px';
+    splash.style.bottom = '0px';
+    game.appendChild(splash);
+    
+    setTimeout(() => {
+      if (splash.parentNode) {
+        game.removeChild(splash);
+      }
+    }, 500);
+    
+    const moveDistance = 25; // Distância de movimento em pixels
+    
+    if (direction === 'left' && turtlePosition > 0) {
+      turtlePosition -= moveDistance;
+    } else if (direction === 'right' && turtlePosition < (game.offsetWidth - turtle.offsetWidth)) {
+      turtlePosition += moveDistance;
+    }
+    turtle.style.left = turtlePosition + 'px';
+  }
+  
+  // Controles de botão
+  leftBtn.addEventListener('pointerdown', () => moveTurtle('left'));
+  rightBtn.addEventListener('pointerdown', () => moveTurtle('right'));
+  
+  // Controle desktop
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowLeft') moveTurtle('left');
+    if (e.key === 'ArrowRight') moveTurtle('right');
+  });
+  
+  // Controle touch mobile
+  let touchStartX = null;
+  
+  game.addEventListener('touchstart', (e) => {
+    e.preventDefault();
+    touchStartX = e.touches[0].clientX;
+  }, { passive: false });
+  
+  game.addEventListener('touchmove', (e) => {
+    e.preventDefault();
+    if (gameOver || touchStartX === null) return;
+    
+    const touchX = e.touches[0].clientX;
+    const diff = touchX - touchStartX;
+    
+    if (Math.abs(diff) > 15) {
+      if (diff > 0) {
+        moveTurtle('right');
+      } else {
+        moveTurtle('left');
+      }
+      touchStartX = touchX;
+    }
+  }, { passive: false });
+  
+  game.addEventListener('touchend', (e) => {
+    e.preventDefault();
+    touchStartX = null;
+  }, { passive: false });
+  
+  // Tipos de lixo com probabilidades
+  const TRASH_TYPES = [
+    { class: 'bottle', width: 16, height: 32, points: 1, weight: 30 },
+    { class: 'plastic-bag', width: 20, height: 24, points: 1, weight: 30 },
+    { class: 'fishing-net', width: 32, height: 32, points: 2, weight: 20 },
+    { class: 'can', width: 16, height: 24, points: 1, weight: 10 },
+    { class: 'tire', width: 24, height: 24, points: 2, weight: 10 }
+  ];
+  
+  // Escolher objeto aleatório baseado em peso
+  function getRandomTrashType() {
+    const totalWeight = TRASH_TYPES.reduce((sum, type) => sum + type.weight, 0);
+    let random = Math.random() * totalWeight;
+    
+    for (const type of TRASH_TYPES) {
+      if (random < type.weight) return type;
+      random -= type.weight;
+    }
+    
+    return TRASH_TYPES[0];
+  }
+  
+  // Mostrar mensagem educativa
+  function showEducationalMessage() {
+    const messages = [
+      "Tartarugas confundem plástico com águas-vivas!",
+      "Redes de pesca abandonadas são armadilhas mortais!",
+      "O plástico no oceano dura até 400 anos!",
+      "Mais de 1 milhão de animais marinhos morrem por ano devido ao plástico!",
+      "Recicle e reduza o uso de plásticos descartáveis!"
+    ];
+    
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    message.textContent = randomMessage;
+    
+    setTimeout(() => {
+      if (!gameOver) message.textContent = '';
+    }, 3000);
+  }
+  
+  // Criar objeto caindo
+  function createFallingObject() {
+    if (gameOver || activeTrash.length >= 15) return; // Limite de objetos na tela
+    
+    const trashType = getRandomTrashType();
+    const trash = document.createElement('div');
+    trash.classList.add('falling-object', trashType.class);
+    trash.dataset.points = trashType.points;
+    
+    // Posição inicial no topo da tela
+    const maxLeft = game.offsetWidth - trashType.width;
+    const startLeft = Math.floor(Math.random() * maxLeft);
+    trash.style.left = startLeft + 'px';
+    trash.style.top = `-${trashType.height}px`; // Começa acima da área visível
+    trash.style.width = trashType.width + 'px';
+    trash.style.height = trashType.height + 'px';
+    
+    // Efeito de rotação para sacolas plásticas
+    if (trashType.class === 'plastic-bag') {
+      trash.style.transform = `rotate(${Math.random() * 360}deg)`;
+    }
+    
+    game.appendChild(trash);
+    
+    // Configurações da animação
+    const startTime = performance.now();
+    const fallDuration = 3000 + Math.random() * 2000; // 3-5 segundos
+    const endPosition = game.offsetHeight;
+    
+    // Oscilação horizontal para efeito mais natural
+    const oscillationAmplitude = Math.random() * 15 + 5;
+    const oscillationSpeed = Math.random() * 0.02 + 0.01;
+    
+    // Efeito de rotação durante a queda
+    let rotation = 0;
+    const rotationSpeed = Math.random() * 2 - 1; // -1 a 1 grau por frame
+    
+    const trashObj = {
+      element: trash,
+      animationId: null,
+      type: trashType
+    };
+    
+    activeTrash.push(trashObj);
+    
+    function animateTrash(currentTime) {
+      if (gameOver || !trash.parentNode) {
+        cancelAnimationFrame(trashObj.animationId);
+        return;
+      }
+      
+      const elapsed = currentTime - startTime;
+      const progress = Math.min(elapsed / fallDuration, 1);
+      
+      // Easing para queda mais natural
+      const easedProgress = progress < 0.5 
+          ? 2 * progress * progress 
+          : 1 - Math.pow(-2 * progress + 2, 2) / 2;
+      
+      const currentTop = easedProgress * (endPosition + trashType.height);
+      
+      // Oscilação horizontal
+      const horizontalOffset = Math.sin(elapsed * oscillationSpeed) * oscillationAmplitude;
+      
+      // Atualiza rotação
+      rotation += rotationSpeed;
+      
+      // Aplica todas as transformações
+      trash.style.transform = `translateX(${horizontalOffset}px) rotate(${rotation}deg) translateZ(0)`;
+      trash.style.top = `${currentTop - trashType.height}px`;
+      
+      // Verificação de colisão
+      if (progress < 1) {
+        if (!invincible && checkCollision(trash, turtleHitbox)) {
+          handleCollision(trashObj);
+          return;
+        }
+        trashObj.animationId = requestAnimationFrame(animateTrash);
+      } else {
+        // Pontuar se o objeto passou pela tartaruga
+        if (!gameOver) {
+          score += parseInt(trash.dataset.points);
+          scoreDisplay.textContent = score;
+        }
+        removeTrash(trashObj);
+      }
+    }
+    
+    trashObj.animationId = requestAnimationFrame(animateTrash);
+    return trashObj;
+  }
+  
+  // Verificação de colisão otimizada
+  function checkCollision(obj1, obj2) {
+    const rect1 = obj1.getBoundingClientRect();
+    const rect2 = obj2.getBoundingClientRect();
+    
+    return !(
+      rect1.right < rect2.left || 
+      rect1.left > rect2.right || 
+      rect1.bottom < rect2.top || 
+      rect1.top > rect2.bottom
+    );
+  }
+  
+  // Manipulação de colisão
+  function handleCollision(trashObj) {
+    // Efeito visual de colisão
+    const collision = document.createElement('div');
+    collision.classList.add('collision-effect');
+    
+    const trashRect = trashObj.element.getBoundingClientRect();
+    const gameRect = game.getBoundingClientRect();
+    
+    collision.style.left = `${trashRect.left - gameRect.left + trashObj.type.width/2 - 20}px`;
+    collision.style.top = `${trashRect.top - gameRect.top + trashObj.type.height/2 - 20}px`;
+    
+    game.appendChild(collision);
+    
+    setTimeout(() => {
+      if (collision.parentNode) {
+        game.removeChild(collision);
+      }
+    }, 500);
+    
+    removeTrash(trashObj);
+    endGame();
+  }
+  
+  // Remover lixo do jogo
+  function removeTrash(trashObj) {
+    if (trashObj.element.parentNode) {
+      game.removeChild(trashObj.element);
+    }
+    cancelAnimationFrame(trashObj.animationId);
+    
+    const index = activeTrash.indexOf(trashObj);
+    if (index !== -1) {
+      activeTrash.splice(index, 1);
+    }
+  }
+  
+  // Fim de jogo
+  function endGame() {
+    gameOver = true;
+    turtle.classList.add('dancing');
+    message.textContent = 'COLISÃO! 🐢💥';
+    
+    // Limpar todos os lixos ativos
+    activeTrash.forEach(trash => {
+      if (trash.element && trash.element.parentNode) {
+        game.removeChild(trash.element);
+      }
+      cancelAnimationFrame(trash.animationId);
+    });
+    activeTrash = [];
+    
+    if (score > highScore) {
+      highScore = score;
+      localStorage.setItem('highScore', highScore);
+      highScoreDisplay.textContent = highScore;
+      message.textContent = 'NOVO RECORDE! 🎉';
+    }
+    
+    finalScoreDisplay.textContent = score;
+    finalHighScoreDisplay.textContent = highScore;
+    gameOverModal.style.display = 'flex';
+    
+    // Atualizar ranking
+    updateRankingDisplay();
+  }
+  
+  // Aumentar dificuldade gradualmente
+  function increaseDifficulty() {
+    if (gameSpeed > 300) {
+      gameSpeed -= 50;
+    }
+  }
+  
+  // Reiniciar jogo
+  function restartGame() {
+    // Limpar todos os lixos ativos
+    activeTrash.forEach(trash => {
+      if (trash.element && trash.element.parentNode) {
+        game.removeChild(trash.element);
+      }
+      cancelAnimationFrame(trash.animationId);
+    });
+    activeTrash = [];
+    
+    centerTurtle();
+    score = 0;
+    scoreDisplay.textContent = score;
+    gameOver = false;
+    gameSpeed = 1000;
+    trashCount = 0;
+    invincible = false;
+    
+    turtle.classList.remove('dancing');
+    message.textContent = '';
+    
+    gameOverModal.style.display = 'none';
+    rankingModal.style.display = 'none';
+    
+    startSpawning();
+    
+    setTimeout(() => {
+      setInterval(increaseDifficulty, 10000);
+    }, 10000);
+  }
+  
+  // Sistema de spawn de objetos
+  function startSpawning() {
+    if (gameOver) return;
+    
+    createFallingObject();
+    
+    // Taxa de spawn dinâmica baseada na dificuldade
+    setTimeout(() => {
+      startSpawning();
+    }, gameSpeed);
+  }
+  
+  // Event listeners para os botões do modal
+  restartBtn.addEventListener('click', restartGame);
+  
+  saveScoreBtn.addEventListener('click', () => {
+    const playerName = playerNameInput.value.trim() || 'ANÔNIMO';
+    addToRanking(playerName, score);
+    playerNameInput.value = '';
+    message.textContent = 'PONTUAÇÃO SALVA!';
+  });
+  
+  showRankingBtn.addEventListener('click', () => {
+    gameOverModal.style.display = 'none';
+    rankingModal.style.display = 'flex';
+    updateRankingDisplay();
+  });
+  
+  backToGameBtn.addEventListener('click', () => {
+    rankingModal.style.display = 'none';
+    gameOverModal.style.display = 'flex';
+  });
+  
+  // Iniciar jogo
+  function startGame() {
+    createBubbles();
+    startSpawning();
+    
+    setTimeout(() => {
+      setInterval(increaseDifficulty, 10000);
+    }, 10000);
+    
+    // Atualizar ranking inicial
+    updateRankingDisplay();
+  }
+</script>
+</body>
+</html>
